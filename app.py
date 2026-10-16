@@ -5,6 +5,7 @@ import requests
 
 from config import MODEL_NAME
 from llm.ollama_client import generate_response_stream
+from ingestion.chunker import chunk_document, get_saved_chunks, read_document_text, save_chunks
 from ingestion.document_manager import get_document_inventory, save_document
 from logs.logger import log_interaction
 
@@ -60,4 +61,38 @@ if st.button("Save documents", disabled=not uploaded_files, key="save_documents"
             st.error(f"Could not upload {uploaded_file.name}: {error}")
 
 st.subheader("Document Inventory")
-st.dataframe(get_document_inventory(), width="stretch", hide_index=True)
+document_inventory = get_document_inventory()
+st.dataframe(document_inventory, width="stretch", hide_index=True)
+
+st.divider()
+st.header("Generate Chunks")
+document_names = document_inventory["document_name"].dropna().astype(str).unique().tolist()
+
+if not document_names:
+    st.info("Upload a document before generating chunks.")
+else:
+    selected_document = st.selectbox("Select uploaded document", document_names)
+
+    if st.button("Generate Chunks", key="generate_chunks"):
+        try:
+            document_text = read_document_text(selected_document)
+            generated_chunks = chunk_document(selected_document, document_text)
+            save_chunks(generated_chunks)
+            st.success(f"Generated and saved {len(generated_chunks)} chunks.")
+        except (FileNotFoundError, OSError, ValueError) as error:
+            st.error(f"Could not generate chunks: {error}")
+
+    saved_chunks = get_saved_chunks(selected_document)
+    if saved_chunks.empty:
+        st.info("No chunks have been generated for this document yet.")
+    else:
+        display_chunks = saved_chunks[
+            ["document_name", "chunk_number", "chunk_text"]
+        ].rename(
+            columns={
+                "document_name": "Document Name",
+                "chunk_number": "Chunk Number",
+                "chunk_text": "Chunk Text",
+            }
+        )
+        st.dataframe(display_chunks, width="stretch", hide_index=True)
