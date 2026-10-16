@@ -1,0 +1,7 @@
+
+// To activate virtual env each time
+cd C:\AI\customer_support_copilot
+.\.venv\Scripts\Activate.ps1
+once executed should see (.venv) beore the prompt
+
+num_predict=128 tells Ollama to generate at most 128 new tokens for one response. It doesn’t limit the question or system prompt. A token is a small piece of text, so 128 
