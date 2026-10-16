@@ -4,6 +4,10 @@ import streamlit as st
 import requests
 
 from config import MODEL_NAME
+from embeddings.embedding_service import (
+    generate_embeddings_for_document,
+    get_embedding_inventory,
+)
 from llm.ollama_client import generate_response_stream
 from ingestion.chunker import chunk_document, get_saved_chunks, read_document_text, save_chunks
 from ingestion.document_manager import get_document_inventory, save_document
@@ -96,3 +100,35 @@ else:
             }
         )
         st.dataframe(display_chunks, width="stretch", hide_index=True)
+
+st.divider()
+st.header("Embeddings")
+chunk_inventory = get_saved_chunks()
+chunk_document_names = (
+    chunk_inventory["document_name"].dropna().astype(str).unique().tolist()
+)
+
+if not chunk_document_names:
+    st.info("Generate document chunks before creating embeddings.")
+else:
+    selected_embedding_document = st.selectbox(
+        "Select document for embeddings",
+        chunk_document_names,
+        key="embedding_document",
+    )
+
+    if st.button("Generate embeddings", key="generate_embeddings"):
+        try:
+            with st.spinner("Generating embeddings..."):
+                generated_embeddings = generate_embeddings_for_document(
+                    selected_embedding_document
+                )
+            st.success(f"Generated {len(generated_embeddings)} embeddings.")
+        except (FileNotFoundError, OSError, ValueError) as error:
+            st.error(f"Could not generate embeddings: {error}")
+
+    embedding_inventory = get_embedding_inventory(selected_embedding_document)
+    if embedding_inventory.empty:
+        st.info("No embeddings have been generated for this document yet.")
+    else:
+        st.dataframe(embedding_inventory, width="stretch", hide_index=True)

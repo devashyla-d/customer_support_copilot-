@@ -1,6 +1,11 @@
 # Later To-Do
 
-- [ ] Make the `phi3:mini` model configurable through deployment settings instead of hardcoding it.
+- [ ] Make the `phi3:mini` model configurable through deployment this is done , any other values to be configurable -settings instead of hardcoding it.
 - [ ] Tune the `num_predict=128` output limit and request timeout using representative questions. `num_predict` caps generated tokens; it does not limit the prompt or question, and a low cap can truncate answers.
 - [ ] Add response streaming so users can see generated text before the full answer is complete.
 - [ ] In a later retrieval stage, provide approved support documents as evidence so answers such as ticket-resolution estimates are not guessed.
+- Enhancement 2 Streaming Response Use Ollama streaming to progressively display text.
+stage 3 chuncking - for now will save metadata in chunks.csv later this will be moved to database
+Future Enhancement:
+Add document_version and document_status metadata before ChromaDB implementation.
+AFTER all testing Hide  Chunking from UI or keep the Generate Chunks section visible through Stage 5, then later move it into an Admin / Document Management area instead of removing it completely

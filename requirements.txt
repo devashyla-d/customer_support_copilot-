@@ -3,3 +3,5 @@ requests
 pandas
 python-dotenv
 pypdf
+sentence-transformers
+truststore

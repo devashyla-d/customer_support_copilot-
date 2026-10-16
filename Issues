@@ -1,0 +1,5 @@
+The CSV/upsert logic passed tests with a fake encoder, diagnostics are clean, and the Embeddings section rendered in Streamlit. Actual model generation is not yet verified: downloading the model from Hugging Face failed with a certificate-verification error, and the model isn’t cached locally. 
+
+Determine exactly why all-MiniLM-L6-v2 cannot be downloaded.
+
+Do not make changes yet. Only diagnose and explain the root cause.

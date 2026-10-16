@@ -1,0 +1,111 @@
+chunk_id,document_name,chunk_number,chunk_text,created_timestamp
+02_Refunds_Credits_Billing_Adjustments_Policy.pdf::chunk-0001,02_Refunds_Credits_Billing_Adjustments_Policy.pdf,1,"Refunds, Credits and Billing Adjustments 
+Policy
+Current commercial rules for refunds, credits and billing corrections
+Document ID Version Status Owner
+FIN-BILL-014 4.1 CURRENT Customer Experience & Operations
+Purpose. This document provides approved operating guidance for the Northstar Cloud Services 
+customer support environment. It is written to support consistent human and AI-assisted decision-
+making.
+1. Policy Scope and Authority
+This policy governs customer refunds, service credits and bi",2026-10-16T14:40:13-04:00
+02_Refunds_Credits_Billing_Adjustments_Policy.pdf::chunk-0002,02_Refunds_Credits_Billing_Adjustments_Policy.pdf,2,"y governs customer refunds, service credits and billing corrections for active Northstar 
+Cloud Services products. Contract-specific terms override standard refund rules when the 
+entitlement record identifies the account as Contract-specific.
+Refund Policy Type Standard Eligibility Approval Path
+30-day
+Eligible cancellation within 30 
+days of initial paid start when 
+no fraud/abuse indicator exists
+Agent may recommend; 
+supervisor approval over $250
+Prorated
+Eligible unused period after 
+approv",2026-10-16T14:40:13-04:00
+02_Refunds_Credits_Billing_Adjustments_Policy.pdf::chunk-0003,02_Refunds_Credits_Billing_Adjustments_Policy.pdf,3,"$250
+Prorated
+Eligible unused period after 
+approved cancellation where 
+plan terms permit
+Supervisor approval
+Contract-specific
+Use executed 
+contract/entitlement terms; do 
+not apply standard policy 
+automatically
+Commercial operations review
+2. Refund Eligibility Rules
+Refund outcomes depend on account dates, product status and entitlement type.
+2.1 Initial purchase refunds
+ For 30-day policy accounts, the request must fall within 30 calendar days of the first paid start 
+date
+ Renewals are",2026-10-16T14:40:13-04:00
+02_Refunds_Credits_Billing_Adjustments_Policy.pdf::chunk-0004,02_Refunds_Credits_Billing_Adjustments_Policy.pdf,4," days of the first paid start 
+date
+ Renewals are not treated as initial purchases unless an explicit renewal exception applies
+ Refund eligibility does not automatically imply immediate payment; approval thresholds still 
+apply
+2.2 Duplicate and incorrect charges
+A confirmed duplicate charge or billing-system error may be corrected regardless of the standard 
+cancellation window. The assistant should distinguish a billing correction from a discretionary 
+refund.
+2.3 Contract-specific accounts",2026-10-16T14:40:13-04:00
+02_Refunds_Credits_Billing_Adjustments_Policy.pdf::chunk-0005,02_Refunds_Credits_Billing_Adjustments_Policy.pdf,5,"cretionary 
+refund.
+2.3 Contract-specific accounts
+If refund_policy_type = Contract-specific, do not infer a refund percentage or period from this 
+document. Retrieve the account entitlement/contract context and escalate if exact terms are 
+unavailable.
+3. Service Credits and Incident-Related Adjustments
+Service credits are not the same as refunds.
+3.1 Credit eligibility
+Service credits may apply when a documented service incident breaches the applicable SLA and the 
+customer has an entitlement ",2026-10-16T14:40:13-04:00
+02_Refunds_Credits_Billing_Adjustments_Policy.pdf::chunk-0006,02_Refunds_Credits_Billing_Adjustments_Policy.pdf,6,"plicable SLA and the 
+customer has an entitlement that includes service-credit remedies.
+3.2 Evidence requirements
+ Incident ID or verified service-impact record
+ Affected account/product
+ Impact window
+ Applicable SLA tier
+ Customer claim or support confirmation
+3.3 Credit limits
+Standard automated recommendations must not exceed 25% of the affected monthly subscription 
+amount. Higher adjustments require finance approval or contract-specific review.
+4. Exceptions, Escalation and Fraud Con",2026-10-16T14:40:13-04:00
+02_Refunds_Credits_Billing_Adjustments_Policy.pdf::chunk-0007,02_Refunds_Credits_Billing_Adjustments_Policy.pdf,7,"ic review.
+4. Exceptions, Escalation and Fraud Controls
+Some requests require manual handling even when they appear policy-compliant.
+4.1 Mandatory escalation
+ Refund request above $1,000
+ More than two refund requests for the same account within 12 months
+ Customer disputes ownership or payment authorization
+ Contract-specific entitlement but contract language is unavailable
+ Potential fraud, chargeback or sanctions concern
+4.2 Response language
+Do not promise that a refund ""will be issued",2026-10-16T14:40:13-04:00
+02_Refunds_Credits_Billing_Adjustments_Policy.pdf::chunk-0008,02_Refunds_Credits_Billing_Adjustments_Policy.pdf,8,"guage
+Do not promise that a refund ""will be issued"" before approval. Use language such as ""appears 
+eligible for review"" until the required approval is complete.
+4.3 Partial evidence
+If dates or entitlement status are missing, the assistant should ask for clarification or retrieve 
+structured data before making a recommendation.
+5. Worked Policy Examples
+Examples are illustrative and do not replace the account entitlement record.
+Scenario Expected Policy Interpretation
+New Core Standard account,",2026-10-16T14:40:13-04:00
+02_Refunds_Credits_Billing_Adjustments_Policy.pdf::chunk-0009,02_Refunds_Credits_Billing_Adjustments_Policy.pdf,9,"d Policy Interpretation
+New Core Standard account, cancellation on 
+day 18
+Potentially eligible under 30-day rule; verify 
+first paid start date and abuse flags.
+Enterprise DataCloud account marked Contract-
+specific
+Do not apply 30-day rule; retrieve contract-
+specific entitlement.
+Confirmed duplicate charge after 60 days Treat as billing correction, not discretionary cancellation refund.
+P1 outage with documented SLA breach Evaluate service-credit remedy under incident/SLA policy.
+Current poli",2026-10-16T14:40:13-04:00
+02_Refunds_Credits_Billing_Adjustments_Policy.pdf::chunk-0010,02_Refunds_Credits_Billing_Adjustments_Policy.pdf,10,"dit remedy under incident/SLA policy.
+Current policy FIN-BILL-014 v4.1 supersedes FIN-BILL-014 v2.7. Archived versions must not be 
+used for current eligibility decisions.",2026-10-16T14:40:13-04:00
