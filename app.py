@@ -3,11 +3,10 @@ from pathlib import Path
 import streamlit as st
 import requests
 
-from llm.ollama_client import generate_response
+from config import MODEL_NAME
+from llm.ollama_client import generate_response_stream
 from ingestion.document_manager import get_document_inventory, save_document
 from logs.logger import log_interaction
-
-MODEL_NAME = "phi3:mini"
 
 st.set_page_config(
     page_title="Customer Support Copilot",
@@ -26,15 +25,22 @@ if st.button("Submit"):
     else:
         full_prompt = f"{system_prompt.strip()}\n\nCustomer Question:\n\n{question.strip()}".strip()
 
+        st.subheader("Response")
+        response_placeholder = st.empty()
+        response_chunks = []
+
         try:
             with st.spinner("Generating response..."):
-                response = generate_response(full_prompt, model=MODEL_NAME)
+                for chunk in generate_response_stream(full_prompt, model=MODEL_NAME):
+                    response_chunks.append(chunk)
+                    response_placeholder.markdown("".join(response_chunks))
 
+            response = "".join(response_chunks)
             log_interaction(question.strip(), response, MODEL_NAME)
-            st.subheader("Response")
-            st.write(response)
-        except requests.RequestException as error:
-            st.error(f"Unable to reach Ollama: {error}")
+            response_placeholder.markdown(response)
+        except requests.RequestException:
+            response_placeholder.empty()
+            st.error("Unable to reach Ollama")
 
 st.divider()
 st.header("Document Upload")

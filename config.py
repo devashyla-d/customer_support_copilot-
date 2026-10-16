@@ -1,0 +1,1 @@
+MODEL_NAME = "phi3:mini"
