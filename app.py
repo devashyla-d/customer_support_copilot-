@@ -2,6 +2,7 @@ from pathlib import Path
 
 import streamlit as st
 import requests
+import pandas as pd
 
 from config import MODEL_NAME
 from embeddings.embedding_service import (
@@ -12,6 +13,11 @@ from llm.ollama_client import generate_response_stream
 from ingestion.chunker import chunk_document, get_saved_chunks, read_document_text, save_chunks
 from ingestion.document_manager import get_document_inventory, save_document
 from logs.logger import log_interaction
+from vectordb.chroma_service import (
+    get_collection_inventory,
+    index_embeddings,
+    search_documents,
+)
 
 st.set_page_config(
     page_title="Customer Support Copilot",
@@ -132,3 +138,111 @@ else:
         st.info("No embeddings have been generated for this document yet.")
     else:
         st.dataframe(embedding_inventory, width="stretch", hide_index=True)
+
+st.divider()
+st.header("Semantic Search")
+st.caption("Index generated embeddings before searching. Reindexing safely updates changed chunks.")
+
+if st.button("Index / Reindex Embeddings", key="index_chroma_embeddings"):
+    try:
+        with st.spinner("Indexing embeddings in ChromaDB..."):
+            indexed_count = index_embeddings()
+        st.success(f"Indexed {indexed_count} chunks in ChromaDB.")
+    except (FileNotFoundError, OSError, ValueError) as error:
+        st.error(f"Could not index embeddings: {error}")
+
+semantic_question = st.text_input(
+    "Enter a question to search indexed documents",
+    key="semantic_search_question",
+)
+
+if st.button("Search", key="semantic_search"):
+    if not semantic_question.strip():
+        st.warning("Enter a question to search.")
+    else:
+        try:
+            with st.spinner("Searching indexed chunks..."):
+                search_results = search_documents(semantic_question, top_k=5)
+
+            if search_results:
+                display_results = pd.DataFrame(search_results)[
+                    ["document_name", "chunk_number", "chunk_text", "similarity_score"]
+                ].rename(
+                    columns={
+                        "document_name": "Document Name",
+                        "chunk_number": "Chunk Number",
+                        "chunk_text": "Chunk Text",
+                        "similarity_score": "Similarity Score",
+                    }
+                )
+                st.dataframe(display_results, width="stretch", hide_index=True)
+            else:
+                st.info("No indexed chunks found. Index embeddings before searching.")
+        except (FileNotFoundError, OSError, ValueError) as error:
+            st.error(f"Could not search documents: {error}")
+
+st.divider()
+st.header("ChromaDB Collection")
+st.caption("Read-only view of the persistent enterprise_support_docs collection.")
+collection_limit = st.number_input(
+    "Maximum records to display",
+    min_value=1,
+    max_value=1000,
+    value=100,
+    step=50,
+    key="chroma_collection_limit",
+)
+
+if st.button("Refresh collection view", key="refresh_chroma_collection"):
+    try:
+        with st.spinner("Loading collection records..."):
+            collection_count, collection_records = get_collection_inventory(
+                int(collection_limit)
+            )
+        st.session_state["chroma_collection_snapshot"] = {
+                "count": collection_count,
+                "records": collection_records,
+            }
+    except (OSError, RuntimeError, ValueError) as error:
+        st.error(f"Could not load the ChromaDB collection: {error}")
+
+collection_snapshot = st.session_state.get("chroma_collection_snapshot")
+if collection_snapshot is None:
+    st.info("Refresh the view to inspect the current ChromaDB collection.")
+else:
+    st.metric("Indexed chunks", collection_snapshot["count"])
+    collection_records = collection_snapshot["records"]
+    if not collection_records:
+        st.info("The collection is empty. Index embeddings before viewing records.")
+    else:
+        collection_table = pd.DataFrame(collection_records)[
+            [
+                "chunk_id",
+                "document_name",
+                "chunk_number",
+                "chunk_text",
+                "embedding_dimensions",
+            ]
+        ].rename(
+            columns={
+                "chunk_id": "Chunk ID",
+                "document_name": "Document Name",
+                "chunk_number": "Chunk Number",
+                "chunk_text": "Chunk Text",
+                "embedding_dimensions": "Vector Dimensions",
+            }
+        )
+        st.dataframe(collection_table, width="stretch", hide_index=True)
+
+        selected_chunk_id = st.selectbox(
+            "Inspect stored vector",
+            [record["chunk_id"] for record in collection_records],
+            key="inspect_chroma_vector",
+        )
+        selected_record = next(
+            record
+            for record in collection_records
+            if record["chunk_id"] == selected_chunk_id
+        )
+        with st.expander("Show raw embedding vector"):
+            st.json(selected_record["embedding_vector"])

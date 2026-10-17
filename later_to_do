@@ -9,3 +9,4 @@ stage 3 chuncking - for now will save metadata in chunks.csv later this will be 
 Future Enhancement:
 Add document_version and document_status metadata before ChromaDB implementation.
 AFTER all testing Hide  Chunking from UI or keep the Generate Chunks section visible through Stage 5, then later move it into an Admin / Document Management area instead of removing it completely
+docker-compose.yml later for application demo
