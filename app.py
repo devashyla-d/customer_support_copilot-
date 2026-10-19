@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 import streamlit as st
 import requests
@@ -12,12 +13,21 @@ from embeddings.embedding_service import (
 from llm.ollama_client import generate_response_stream
 from ingestion.chunker import chunk_document, get_saved_chunks, read_document_text, save_chunks
 from ingestion.document_manager import get_document_inventory, save_document
-from logs.logger import log_interaction
+from logs.logger import log_interaction, log_rag_interaction
+from rag.rag_service import answer_question
 from vectordb.chroma_service import (
     get_collection_inventory,
     index_embeddings,
     search_documents,
 )
+
+
+def _display_source_name(document_name: str) -> str:
+    display_name = Path(document_name).name
+    while Path(display_name).suffix.lower() in {".pdf", ".txt", ".md"}:
+        display_name = Path(display_name).stem
+    return re.sub(r"^\d+_", "", display_name)
+
 
 st.set_page_config(
     page_title="Customer Support Copilot",
@@ -28,30 +38,91 @@ st.title("Customer Support Copilot")
 prompt_file = Path(__file__).resolve().parent / "prompts" / "system_prompt.txt"
 system_prompt = prompt_file.read_text(encoding="utf-8") if prompt_file.is_file() else ""
 
-question = st.text_area("Enter your question", height=150)
+st.header("Customer Support Copilot")
+st.caption("Answers are grounded in retrieved support-document chunks.")
+rag_question = st.text_area(
+    "Enter your question",
+    height=120,
+    key="rag_question",
+)
 
-if st.button("Submit"):
-    if not question.strip():
-        st.warning("Please enter a question.")
+if st.button("Ask", key="ask_rag_question"):
+    if not rag_question.strip():
+        st.warning("Enter a question to ask.")
     else:
-        full_prompt = f"{system_prompt.strip()}\n\nCustomer Question:\n\n{question.strip()}".strip()
-
-        st.subheader("Response")
-        response_placeholder = st.empty()
-        response_chunks = []
-
         try:
-            with st.spinner("Generating response..."):
-                for chunk in generate_response_stream(full_prompt, model=MODEL_NAME):
-                    response_chunks.append(chunk)
-                    response_placeholder.markdown("".join(response_chunks))
+            with st.spinner("Retrieving evidence and generating an answer..."):
+                result = answer_question(rag_question, top_k=5)
 
-            response = "".join(response_chunks)
-            log_interaction(question.strip(), response, MODEL_NAME)
-            response_placeholder.markdown(response)
+            log_rag_interaction(
+                rag_question.strip(),
+                result["sources"],
+                result["answer"],
+            )
+            st.subheader("Answer")
+            st.write(result["answer"])
+
+            st.subheader("Sources")
+            if result["sources"]:
+                source_rows = [
+                    {
+                        "Document Name": _display_source_name(
+                            source["document_name"]
+                        ),
+                        "Chunk Number": source["chunk_number"],
+                    }
+                    for source in result["sources"]
+                ]
+                st.dataframe(pd.DataFrame(source_rows), width="stretch", hide_index=True)
+            else:
+                st.write("No supporting document chunks met the evidence threshold.")
+
+            with st.expander("Debug: Final prompt sent to Phi3"):
+                if result["debug_prompt"] is None:
+                    st.info("Phi3 was not called because no evidence met the threshold.")
+                else:
+                    st.code(result["debug_prompt"], language=None)
         except requests.RequestException:
-            response_placeholder.empty()
             st.error("Unable to reach Ollama")
+        except (FileNotFoundError, OSError, ValueError) as error:
+            st.error(f"Could not answer from retrieved documents: {error}")
+
+with st.expander("Developer/Test: Direct Phi3 Chat"):
+    st.caption("This optional path bypasses retrieval and sends the question directly to Phi3.")
+    direct_question = st.text_area(
+        "Enter a direct model test question",
+        height=100,
+        key="developer_direct_question",
+    )
+
+    if st.button("Send directly to Phi3", key="direct_phi3_submit"):
+        if not direct_question.strip():
+            st.warning("Enter a question to ask Phi3.")
+        else:
+            direct_prompt = (
+                f"{system_prompt.strip()}\n\nCustomer Question:\n\n"
+                f"{direct_question.strip()}"
+            ).strip()
+            direct_response_placeholder = st.empty()
+            direct_response_chunks = []
+
+            try:
+                with st.spinner("Generating direct Phi3 response..."):
+                    for chunk in generate_response_stream(
+                        direct_prompt,
+                        model=MODEL_NAME,
+                    ):
+                        direct_response_chunks.append(chunk)
+                        direct_response_placeholder.markdown(
+                            "".join(direct_response_chunks)
+                        )
+
+                direct_response = "".join(direct_response_chunks)
+                log_interaction(direct_question.strip(), direct_response, MODEL_NAME)
+                direct_response_placeholder.markdown(direct_response)
+            except requests.RequestException:
+                direct_response_placeholder.empty()
+                st.error("Unable to reach Ollama")
 
 st.divider()
 st.header("Document Upload")

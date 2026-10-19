@@ -1,0 +1,76 @@
+Future Enhancement: Business-Friendly Source Citations
+
+Objective:
+Replace technical chunk-level source references with business-friendly document citations that align with enterprise support and governance requirements.
+
+Current Display:
+
+Sources:
+Refunds_Credits_Billing_Adjustments_Policy.pdf
+Chunk 5
+
+Target Display:
+
+Sources:
+FIN-BILL-014 v4.1
+Section 2.3 – Contract-Specific Accounts
+
+FIN-BILL-014 v4.1
+Section 4.1 – Mandatory Escalation
+
+Requirements:
+
+1. Extend document metadata to capture:
+   - document_id
+   - document_version
+   - section_number
+   - section_name
+   - document_status
+
+2. Modify chunk generation to preserve section-level metadata.
+
+3. Update ChromaDB metadata to store:
+   - document_id
+   - document_version
+   - section_number
+   - section_name
+
+4. Update retrieval results to return business-friendly citations instead of chunk IDs.
+
+5. Display:
+   - Document ID
+   - Version
+   - Section Number
+   - Section Name
+
+6. Add optional:
+   "View Supporting Evidence"
+   expander showing the underlying chunk text.
+
+7. Preserve chunk_id internally for debugging and traceability but do not expose chunk identifiers to end users.
+
+Expected User Experience:
+
+Answer:
+Contract-specific accounts must use executed contract/entitlement terms. Standard refund policies do not automatically apply.
+
+Sources:
+FIN-BILL-014 v4.1
+Section 2.3 – Contract-Specific Accounts
+
+FIN-BILL-014 v4.1
+Section 4.1 – Mandatory Escalation
+
+Success Criteria:
+- Users see policy references rather than technical chunk numbers.
+- Source attribution remains traceable and auditable.
+- Evidence remains available through an expandable supporting-evidence view.
+- Citations align with enterprise support and compliance expectations.
+
+UI chat display
+- Friendly source display
+- Source grouping
+- Citation formatting
+- Expandable evidence panel
+- UI polish
+- Metrics cards

@@ -10,3 +10,7 @@ Future Enhancement:
 Add document_version and document_status metadata before ChromaDB implementation.
 AFTER all testing Hide  Chunking from UI or keep the Generate Chunks section visible through Stage 5, then later move it into an Admin / Document Management area instead of removing it completely
 docker-compose.yml later for application demo
+Future Enhancement performance tunning:
+- Reduce Top K from 5 to 3 for testing
+- Measure retrieval vs generation latency 500 characters × 5 chunks instead change 500 characters × 5 chunks
+- Optimize prompt size
